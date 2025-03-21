@@ -120,7 +120,7 @@ def fill_signup_form(page, first_name, last_name, email, config, translator=None
 #     return ""
 
 def get_default_chrome_path():
-    """Get the default Chrome executable path, with better error handling."""
+    """Get the default Chrome executable path, ensuring it's an executable."""
     
     # Allow manual override
     chrome_env = os.environ.get("CHROME_PATH")
@@ -143,6 +143,21 @@ def get_default_chrome_path():
             return path
 
     raise FileNotFoundError("Chrome executable not found. Try setting CHROME_PATH manually.")
+
+def get_chrome_profile_path():
+    """Get the correct Chrome profile directory"""
+    if sys.platform == "linux":
+        profile_path = os.path.expanduser("~/.config/google-chrome/Default")
+    elif sys.platform == "darwin":
+        profile_path = os.path.expanduser("~/Library/Application Support/Google/Chrome/Default")
+    else:  # Windows
+        profile_path = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Google", "Chrome", "User Data", "Default")
+
+    if os.path.exists(profile_path):
+        return profile_path
+    else:
+        raise FileNotFoundError(f"Chrome profile not found at {profile_path}. Try creating a profile first.")
+
 
 def get_user_documents_path():
     """Get user Documents folder path"""
