@@ -96,8 +96,37 @@ def fill_signup_form(page, first_name, last_name, email, config, translator=None
             print(f"Error filling form: {e}")
         return False
 
+# def get_default_chrome_path():
+#     """Get default Chrome path"""
+#     if sys.platform == "win32":
+#         paths = [
+#             os.path.join(os.environ.get('PROGRAMFILES', ''), 'Google/Chrome/Application/chrome.exe'),
+#             os.path.join(os.environ.get('PROGRAMFILES(X86)', ''), 'Google/Chrome/Application/chrome.exe'),
+#             os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Google/Chrome/Application/chrome.exe')
+#         ]
+#     elif sys.platform == "darwin":
+#         paths = [
+#             "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+#         ]
+#     else:  # Linux
+#         paths = [
+#             "/usr/bin/google-chrome",
+#             "/usr/bin/google-chrome-stable"
+#         ]
+
+#     for path in paths:
+#         if os.path.exists(path):
+#             return path
+#     return ""
+
 def get_default_chrome_path():
-    """Get default Chrome path"""
+    """Get the default Chrome executable path, with better error handling."""
+    
+    # Allow manual override
+    chrome_env = os.environ.get("CHROME_PATH")
+    if chrome_env and os.path.exists(chrome_env) and os.access(chrome_env, os.X_OK):
+        return chrome_env
+
     if sys.platform == "win32":
         paths = [
             os.path.join(os.environ.get('PROGRAMFILES', ''), 'Google/Chrome/Application/chrome.exe'),
@@ -105,19 +134,15 @@ def get_default_chrome_path():
             os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Google/Chrome/Application/chrome.exe')
         ]
     elif sys.platform == "darwin":
-        paths = [
-            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-        ]
+        paths = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
     else:  # Linux
-        paths = [
-            "/usr/bin/google-chrome",
-            "/usr/bin/google-chrome-stable"
-        ]
+        paths = ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable"]
 
     for path in paths:
-        if os.path.exists(path):
+        if os.path.exists(path) and os.access(path, os.X_OK):
             return path
-    return ""
+
+    raise FileNotFoundError("Chrome executable not found. Try setting CHROME_PATH manually.")
 
 def get_user_documents_path():
     """Get user Documents folder path"""
